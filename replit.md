@@ -4,17 +4,28 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
+## Artifacts
+
+- **BarberControl** (`artifacts/barbercontrol`) — SPA for barbershop management. Three sections: Agenda, Barberos, Caja. All data persisted in localStorage. Dark theme with gold accents (#0A0A0A / #D4AF37). WhatsApp confirmation links and JSON backup/restore.
+- **API Server** (`artifacts/api-server`) — shared Express API (not used by BarberControl which is frontend-only).
+- **Canvas** (`artifacts/mockup-sandbox`) — design sandbox.
+
 ## Stack
 
 - **Monorepo tool**: pnpm workspaces
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
+- **Frontend**: React + Vite + Tailwind v4 + shadcn/ui + framer-motion + wouter
 - **API framework**: Express 5
 - **Database**: PostgreSQL + Drizzle ORM
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+
+## Deployment
+
+- `vercel.json` at the repo root configures Vite SPA deployment (framework: vite, outputDirectory: dist/public, SPA rewrites for client routing).
 
 ## Key Commands
 
@@ -23,5 +34,6 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
+- `pnpm --filter @workspace/barbercontrol run dev` — run BarberControl locally
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
