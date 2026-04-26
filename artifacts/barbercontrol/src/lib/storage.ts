@@ -14,6 +14,7 @@ export type Turno = {
 export type Barbero = {
   id: string;
   nombre: string;
+  comisionPct: number; // 0..100, percentage that goes to the barber
 };
 
 export type Servicio = {
@@ -46,8 +47,8 @@ const KEYS = {
 
 // Default Seeds
 const DEFAULT_BARBEROS: Barbero[] = [
-  { id: "1", nombre: "Fede" },
-  { id: "2", nombre: "Maxi" },
+  { id: "1", nombre: "Fede", comisionPct: 50 },
+  { id: "2", nombre: "Maxi", comisionPct: 50 },
 ];
 
 const DEFAULT_SERVICIOS: Servicio[] = [
@@ -84,10 +85,21 @@ function setItem<T>(key: string, value: T): void {
   }
 }
 
-// Initialize defaults if empty
+// Initialize defaults if empty + migrate older shapes (e.g. barberos sin comisionPct)
 export function initStorage() {
   if (!window.localStorage.getItem(KEYS.BARBEROS)) {
     setItem(KEYS.BARBEROS, DEFAULT_BARBEROS);
+  } else {
+    const existing = getItem<Barbero[]>(KEYS.BARBEROS, DEFAULT_BARBEROS);
+    let mutated = false;
+    const migrated = existing.map((b) => {
+      if (typeof b.comisionPct !== "number") {
+        mutated = true;
+        return { ...b, comisionPct: 50 };
+      }
+      return b;
+    });
+    if (mutated) setItem(KEYS.BARBEROS, migrated);
   }
   if (!window.localStorage.getItem(KEYS.SERVICIOS)) {
     setItem(KEYS.SERVICIOS, DEFAULT_SERVICIOS);
@@ -123,7 +135,6 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     };
 
     window.addEventListener("local-storage-update", handleStorageChange);
-    // Listen to changes from other tabs
     window.addEventListener("storage", (e) => {
       if (e.key === key) handleStorageChange();
     });
@@ -150,6 +161,7 @@ export function descargarRespaldo() {
     servicios: getItem(KEYS.SERVICIOS, DEFAULT_SERVICIOS),
     transacciones: getItem(KEYS.TRANSACCIONES, []),
     settings: getItem(KEYS.SETTINGS, DEFAULT_SETTINGS),
+    exportedAt: new Date().toISOString(),
   };
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
